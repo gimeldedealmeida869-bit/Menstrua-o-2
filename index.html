@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gimisidora - Controle de Ciclo Menstrual</title>
+    
+    <!-- PWA Primary Meta Tags -->
+    <meta name="theme-color" content="#EC4899">
+    <meta name="description" content="Gimisidora - Aplicativo de acompanhamento e controle de ciclo menstrual, fertilidade e bem-estar.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gimisidora">
+    
+    <!-- PWA Manifest Dynamic Generation -->
+    <script>
+        const manifestData = {
+            "name": "Gimisidora - Controle Menstrual",
+            "short_name": "Gimisidora",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#FAFAFC",
+            "theme_color": "#EC4899",
+            "orientation": "portrait",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23EC4899'><circle cx='256' cy='256' r='240' fill='%23FDF2F8' stroke='%23EC4899' stroke-width='16'/><path d='M256 120 C180 120 140 180 140 250 C140 330 200 380 256 380 C312 380 372 330 372 250 C372 180 332 120 256 120 Z' fill='%23EC4899'/></svg>",
+                    "sizes": "192x192",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                },
+                {
+                    "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%23EC4899'><circle cx='256' cy='256' r='240' fill='%23FDF2F8' stroke='%23EC4899' stroke-width='16'/><path d='M256 120 C180 120 140 180 140 250 C140 330 200 380 256 380 C312 380 372 330 372 250 C372 180 332 120 256 120 Z' fill='%23EC4899'/></svg>",
+                    "sizes": "512x512",
+                    "type": "image/svg+xml",
+                    "purpose": "any maskable"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        const manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        manifestLink.href = manifestURL;
+        document.head.appendChild(manifestLink);
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23FDF2F8' stroke='%23EC4899' stroke-width='4'/><path d='M50 20 C35 20 25 35 25 50 C25 70 38 80 50 80 C62 80 75 70 75 50 C75 35 65 20 50 20 Z' fill='%23EC4899'/></svg>">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#FDF2F8',
+                            100: '#FCE7F3',
+                            200: '#FBCFE8',
+                            300: '#F472B6',
+                            400: '#E11D48',
+                            500: '#DB2777',
+                            600: '#BE185D',
+                            700: '#9D174D',
+                        },
+                        lilas: {
+                            50: '#FAF5FF',
+                            100: '#F3E8FF',
+                            200: '#E9D5FF',
+                            300: '#C084FC',
+                            400: '#A855F7',
+                            500: '#9333EA',
+                            600: '#7E22CE',
+                        },
+                        coral: {
+                            50: '#FFF7ED',
+                            100: '#FFEDD5',
+                            200: '#FED7AA',
+                            300: '#FDBA74',
+                            400: '#FB923C',
+                            500: '#F97316',
+                        },
+                        blush: '#FFF5F7',
+                        softBg: '#FAFAFC'
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Alpine.js & Chart.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FAFAFC;
+            color: #334155;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .brand-gradient-text {
+            background: linear-gradient(135deg, #EC4899 0%, #A855F7 50%, #F97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-gradient-bg {
+            background: linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
+        }
+
+        .brand-shadow {
+            box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.15);
+        }
+
+        .logo-hover-effect {
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .logo-hover-effect:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FCE7F3; border-radius: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #F472B6; border-radius: 8px; }
+    </style>
+</head>
+
+<body class="bg-softBg min-h-screen text-slate-800 flex flex-col justify-between selection:bg-brand-100 selection:text-brand-700" x-data="gimisidoraApp()" x-init="init()">
+
+    <!-- Install PWA Banner (if installable) -->
+    <div x-show="deferredPrompt" x-transition class="bg-gradient-to-r from-brand-500 to-purple-600 text-white px-4 py-3 shadow-lg flex items-center justify-between z-50 text-xs sm:text-sm">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-download text-lg"></i>
+            <span>Instale o <strong>Gimisidora</strong> na sua tela inicial para usar offline!</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button @click="installPWA()" class="bg-white text-brand-700 font-bold px-3 py-1.5 rounded-xl text-xs hover:bg-rose-50 transition shadow-sm">Instalar</button>
+            <button @click="deferredPrompt = null" class="text-white/80 hover:text-white px-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header & Logo -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-rose-100 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3.5 cursor-pointer" @click="currentTab = 'dashboard'">
+                
+                <!-- Ornamental Monogram GI Logo -->
+                <div class="relative group logo-hover-effect">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-100 via-purple-50 to-orange-100 p-0.5 shadow-md flex items-center justify-center border border-rose-200/60">
+                        <svg class="w-full h-full p-1" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="gimisidoraGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#EC4899" />
+                                    <stop offset="50%" stop-color="#A855F7" />
+                                    <stop offset="100%" stop-color="#F97316" />
+                                </linearGradient>
+                                <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#F472B6" />
+                                    <stop offset="100%" stop-color="#C084FC" />
+                                </linearGradient>
+                            </defs>
+
+                            <circle cx="100" cy="100" r="88" stroke="url(#gimisidoraGrad)" stroke-width="4" stroke-dasharray="8 4" opacity="0.4" />
+                            <path d="M 40,100 C 40,60 60,40 100,40 C 140,40 160,60 160,100 C 160,140 140,160 100,160 C 60,160 40,140 40,100 Z" stroke="url(#gimisidoraGrad)" stroke-width="3" fill="none" />
+                            
+                            <!-- GI Monogram -->
+                            <path d="M 88,80 C 72,72 58,88 58,102 C 58,122 76,130 90,120 C 96,116 98,108 98,102 L 80,102" stroke="url(#gimisidoraGrad)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                            <path d="M 120,78 L 120,126" stroke="url(#gimisidoraGrad)" stroke-width="7" stroke-linecap="round" fill="none" />
+                            <circle cx="120" cy="66" r="4.5" fill="url(#gimisidoraGrad)" />
+
+                            <path d="M 100,32 C 95,22 105,15 100,10 C 95,15 105,22 100,32 Z" fill="url(#leafGrad)" />
+                            <path d="M 100,168 C 95,178 105,185 100,190 C 95,185 105,178 100,168 Z" fill="url(#leafGrad)" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div>
+                    <h1 class="text-2xl font-serif-title font-bold brand-gradient-text tracking-wide">GIMISIDORA</h1>
+                    <p class="text-[10px] text-brand-600 tracking-wider uppercase font-semibold">Harmonia & Bem-Estar Feminino</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button @click="currentTab = 'settings'" class="w-10 h-10 rounded-2xl bg-brand-50 border border-brand-200 hover:bg-brand-100 text-brand-700 flex items-center justify-center transition shadow-sm" title="Configurações">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="max-w-4xl mx-auto px-4 py-6 w-full flex-grow mb-20">
+        
+        <!-- Toast Notification system -->
+        <div x-show="toast.show" x-transition class="fixed top-20 right-4 z-50 bg-slate-900/90 text-rose-100 border border-brand-300/30 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3 text-sm backdrop-blur-md">
+            <i :class="toast.icon" class="text-brand-300 text-lg"></i>
+            <span x-text="toast.message" class="font-medium"></span>
+        </div>
+
+        <!-- VIEW 1: DASHBOARD -->
+        <div x-show="currentTab === 'dashboard'" x-transition:enter class="space-y-6">
+            
+            <!-- Cycle Central Card -->
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 sm:p-8 brand-shadow relative overflow-hidden">
+                <div class="absolute -right-12 -bottom-12 w-56 h-56 bg-gradient-to-br from-brand-100/70 to-lilas-200/40 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-coral-100/50 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative z-10">
+                    
+                    <!-- Circular Progress Gauge -->
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-48 h-48 transform -rotate-90">
+                            <circle cx="96" cy="96" r="82" stroke="currentColor" stroke-width="12" class="text-rose-100 fill-transparent"></circle>
+                            <circle cx="96" cy="96" r="82" stroke="currentColor" stroke-width="12" 
+                                    :stroke-dasharray="515" 
+                                    :stroke-dashoffset="515 - (515 * Math.min(stats.cycleDay, stats.avgCycle)) / stats.avgCycle" 
+                                    class="text-brand-500 fill-transparent transition-all duration-1000 stroke-round"></circle>
+                        </svg>
+                        <div class="absolute text-center flex flex-col items-center">
+                            <span class="text-[10px] uppercase tracking-widest text-brand-600 font-bold">Dia do Ciclo</span>
+                            <div class="text-5xl font-serif-title font-bold text-slate-800 my-0.5" x-text="stats.cycleDay"></div>
+                            <span class="text-xs text-brand-700 font-semibold px-3 py-0.5 rounded-full bg-brand-50 border border-brand-200" x-text="'de ' + stats.avgCycle + ' dias'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Current Phase Details -->
+                    <div class="flex-1 text-center md:text-left space-y-4">
+                        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide border"
+                             :class="{
+                                'bg-rose-100 text-rose-800 border-rose-300': stats.currentPhase === 'Menstrual',
+                                'bg-brand-50 text-brand-800 border-brand-200': stats.currentPhase === 'Folicular',
+                                'bg-coral-100 text-coral-800 border-coral-300': stats.currentPhase === 'Ovulatório',
+                                'bg-lilas-100 text-lilas-800 border-lilas-200': stats.currentPhase === 'Lútea'
+                             }">
+                            <i class="fa-solid fa-sparkles text-[10px]"></i>
+                            <span x-text="'Fase ' + stats.currentPhase"></span>
+                        </div>
+
+                        <h2 class="text-3xl font-serif-title font-bold text-slate-800" x-text="stats.phaseTitle"></h2>
+                        <p class="text-sm text-slate-600 leading-relaxed" x-text="stats.phaseDescription"></p>
+
+                        <!-- Highlights Grid -->
+                        <div class="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+                            <div class="bg-rose-50/80 border border-rose-200 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
+                                <i class="fa-solid fa-calendar-heart text-brand-500 text-lg"></i>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-brand-700 uppercase font-bold tracking-wider">Próxima Menstruação</p>
+                                    <p class="text-xs font-bold text-slate-800" x-text="stats.nextPeriodDateFormatted"></p>
+                                </div>
+                            </div>
+                            <div class="bg-lilas-50/80 border border-lilas-200 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
+                                <i class="fa-solid fa-hourglass-half text-lilas-600 text-lg"></i>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-lilas-700 uppercase font-bold tracking-wider">Faltam</p>
+                                    <p class="text-xs font-bold text-slate-800" x-text="stats.daysUntilNext + ' dias'"></p>
+                                </div>
+                            </div>
+                            <div class="bg-coral-50/80 border border-coral-200 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
+                                <i class="fa-solid fa-sun text-coral-500 text-lg"></i>
+                                <div class="text-left">
+                                    <p class="text-[10px] text-coral-700 uppercase font-bold tracking-wider">Ovulação Estimada</p>
+                                    <p class="text-xs font-bold text-slate-800" x-text="stats.ovulationDateFormatted"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Shortcuts -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button @click="openLogModal(formatDateKey(new Date()))" class="brand-gradient-bg hover:opacity-95 text-white p-4 rounded-2xl shadow-lg shadow-brand-500/20 flex items-center justify-between transition transform active:scale-98">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                            <i class="fa-solid fa-heart-pulse text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-base">Registrar Sintomas & Humor</h3>
+                            <p class="text-xs text-rose-100">Como você está hoje?</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-rose-100"></i>
+                </button>
+
+                <button @click="togglePeriodToday()" class="bg-white hover:bg-rose-50 border border-rose-200 text-slate-800 p-4 rounded-2xl shadow-sm flex items-center justify-between transition transform active:scale-98">
+                    <div class="flex items-center space-x-3.5">
+                        <div class="bg-rose-100 p-3 rounded-xl text-brand-600">
+                            <i class="fa-solid fa-droplet text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-base" x-text="isPeriodToday ? 'Remover Início de Ciclo' : 'Registrar Menstruação Hoje'"></h3>
+                            <p class="text-xs text-slate-500">Marcar o 1º dia do ciclo atual</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-2xl" :class="isPeriodToday ? 'text-brand-500' : 'text-slate-300'"></i>
+                </button>
+            </div>
+
+            <!-- Daily Tip -->
+            <div class="bg-gradient-to-r from-brand-600 via-lilas-600 to-purple-700 rounded-3xl p-6 text-white shadow-xl shadow-brand-500/15 relative overflow-hidden">
+                <div class="absolute right-2 bottom-2 opacity-10 pointer-events-none">
+                    <i class="fa-solid fa-spa text-9xl"></i>
+                </div>
+                <div class="relative z-10 space-y-2">
+                    <div class="inline-block bg-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider px-3 py-1 rounded-full font-bold text-rose-100">
+                        <i class="fa-solid fa-lightbulb mr-1"></i> Dica de Saúde Gimisidora
+                    </div>
+                    <h3 class="text-xl font-serif-title font-bold text-white" x-text="stats.phaseTipTitle"></h3>
+                    <p class="text-sm text-rose-100 leading-relaxed max-w-xl" x-text="stats.phaseTipBody"></p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW 2: CALENDAR -->
+        <div x-show="currentTab === 'calendar'" x-transition:enter class="space-y-6">
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-6">
+                
+                <!-- Calendar Month Controls -->
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-serif-title font-bold text-slate-800 capitalize" x-text="monthNames[calendarMonth] + ' ' + calendarYear"></h2>
+                    <div class="flex items-center space-x-2">
+                        <button @click="changeMonth(-1)" class="w-9 h-9 rounded-xl bg-brand-50 border border-brand-200 hover:bg-brand-100 text-brand-700 flex items-center justify-center transition">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <button @click="goToCurrentMonth()" class="px-3.5 py-1.5 text-xs font-bold rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 transition">Hoje</button>
+                        <button @click="changeMonth(1)" class="w-9 h-9 rounded-xl bg-brand-50 border border-brand-200 hover:bg-brand-100 text-brand-700 flex items-center justify-center transition">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Weekday Headers -->
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-brand-600 uppercase tracking-wider pb-2 border-b border-rose-100">
+                    <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                </div>
+
+                <!-- Days Grid -->
+                <div class="grid grid-cols-7 gap-2">
+                    <template x-for="day in calendarDays">
+                        <div class="aspect-square flex flex-col items-center justify-center relative p-0.5">
+                            <div x-show="day.dateStr" @click="openLogModal(day.dateStr)" 
+                                 class="w-full h-full rounded-2xl flex flex-col items-center justify-center cursor-pointer transition select-none relative group"
+                                 :class="{
+                                    'bg-brand-500 text-white font-bold shadow-md shadow-brand-200': day.isPeriod,
+                                    'bg-coral-400 text-white font-bold border border-coral-500 shadow-sm': day.isOvulation && !day.isPeriod,
+                                    'bg-coral-100/90 text-coral-800 font-medium border border-coral-200': day.isFertile && !day.isOvulation && !day.isPeriod,
+                                    'bg-brand-100/60 text-brand-700 font-medium border border-dashed border-brand-300': day.isPredictedPeriod && !day.isPeriod,
+                                    'bg-slate-50 hover:bg-brand-50 text-slate-700': !day.isPeriod && !day.isFertile && !day.isOvulation && !day.isPredictedPeriod,
+                                    'ring-2 ring-brand-500 ring-offset-1': day.isToday
+                                 }">
+                                <span class="text-sm font-semibold" x-text="day.dayNumber"></span>
+                                
+                                <div class="absolute bottom-1.5 flex space-x-1">
+                                    <template x-if="dailyLogs[day.dateStr]">
+                                        <span class="w-1.5 h-1.5 rounded-full" :class="day.isPeriod ? 'bg-white' : 'bg-brand-500'"></span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Legend -->
+                <div class="pt-4 border-t border-rose-100 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-600">
+                    <div class="flex items-center space-x-2"><span class="w-3.5 h-3.5 rounded-lg bg-brand-500 inline-block"></span><span>Menstruação</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-3.5 h-3.5 rounded-lg bg-coral-100 border border-coral-200 inline-block"></span><span>Janela Fértil</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-3.5 h-3.5 rounded-lg bg-coral-400 inline-block"></span><span>Ovulação (Pico)</span></div>
+                    <div class="flex items-center space-x-2"><span class="w-3.5 h-3.5 rounded-lg bg-brand-100 border border-dashed border-brand-300 inline-block"></span><span>Previsão</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: DIARY & SYMPTOMS -->
+        <div x-show="currentTab === 'diary'" x-transition:enter class="space-y-6">
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-rose-100 pb-4">
+                    <div>
+                        <h2 class="text-xl font-serif-title font-bold text-slate-800">Diário do Ciclo</h2>
+                        <p class="text-xs text-slate-500">Selecione uma data para adicionar sintomas e humores</p>
+                    </div>
+                    <input type="date" x-model="selectedDate" @change="openLogModal(selectedDate)" class="bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold rounded-xl px-3 py-2 focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button @click="openLogModal(formatDateKey(new Date()))" class="p-6 bg-blush border border-rose-200 rounded-2xl text-left space-y-2 hover:bg-rose-100/50 transition">
+                        <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base">Registrar Hoje</h3>
+                        <p class="text-xs text-slate-500">Acompanhe diariamente as variações do seu bem-estar</p>
+                    </button>
+
+                    <div class="p-6 bg-lilas-50/50 border border-lilas-200 rounded-2xl space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-notes-medical text-lilas-600"></i>
+                            <span>Último Registro</span>
+                        </h3>
+                        <template x-if="lastLoggedEntry">
+                            <div class="space-y-2 text-xs">
+                                <p class="font-bold text-lilas-700" x-text="formatDateDisplay(lastLoggedEntry.date)"></p>
+                                <div class="flex flex-wrap gap-1">
+                                    <template x-for="s in lastLoggedEntry.data.symptoms">
+                                        <span class="bg-white border border-lilas-200 px-2 py-0.5 rounded-md text-slate-700" x-text="symptomLabels[s] || s"></span>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!lastLoggedEntry">
+                            <p class="text-xs text-slate-400 italic">Nenhum registro encontrado ainda.</p>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: HISTORY & ANALYTICS -->
+        <div x-show="currentTab === 'history'" x-transition:enter class="space-y-6">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white border border-rose-100 rounded-3xl p-5 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center text-xl font-bold border border-brand-200">
+                        <i class="fa-solid fa-arrows-spin"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-brand-600 font-bold uppercase tracking-wider">Média do Ciclo</p>
+                        <h3 class="text-2xl font-serif-title font-bold text-slate-800"><span x-text="settings.avgCycle"></span> dias</h3>
+                    </div>
+                </div>
+                <div class="bg-white border border-rose-100 rounded-3xl p-5 shadow-sm flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-lilas-100 text-lilas-600 flex items-center justify-center text-xl font-bold border border-lilas-200">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-lilas-600 font-bold uppercase tracking-wider">Média da Menstruação</p>
+                        <h3 class="text-2xl font-serif-title font-bold text-slate-800"><span x-text="settings.periodLength"></span> dias</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cycle Duration Chart -->
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-4">
+                <h3 class="font-serif-title font-bold text-slate-800 text-lg">Variação da Duração dos Ciclos</h3>
+                <div class="h-64 relative">
+                    <canvas id="cycleChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Previous Cycles Table -->
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-serif-title font-bold text-slate-800 text-lg">Ciclos Registrados</h3>
+                    <button @click="openAddCycleModal = true" class="text-xs bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 font-bold px-3.5 py-2 rounded-xl transition flex items-center space-x-1">
+                        <i class="fa-solid fa-plus mr-1"></i> Adicionar Ciclo
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <template x-for="(cycle, index) in cycles" :key="index">
+                        <div class="flex items-center justify-between p-4 bg-blush rounded-2xl border border-rose-100">
+                            <div class="flex items-center space-x-3.5">
+                                <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center text-sm font-bold">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-800" x-text="formatDateDisplay(cycle.startDate) + (cycle.endDate ? ' - ' + formatDateDisplay(cycle.endDate) : '')"></p>
+                                    <p class="text-xs text-slate-500 font-medium" x-text="cycle.duration ? cycle.duration + ' dias de duração' : 'Ciclo atual em andamento'"></p>
+                                </div>
+                            </div>
+                            <button @click="deleteCycle(index)" class="text-slate-400 hover:text-rose-600 transition p-2">
+                                <i class="fa-solid fa-trash-can text-sm"></i>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: SETTINGS -->
+        <div x-show="currentTab === 'settings'" x-transition:enter class="space-y-6">
+            <div class="bg-white border border-rose-100 rounded-3xl p-6 shadow-sm space-y-6">
+                <h2 class="text-xl font-serif-title font-bold text-slate-800 border-b border-rose-100 pb-3">Configurações do Gimisidora</h2>
+                
+                <div class="space-y-4 max-w-md">
+                    <div>
+                        <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Duração Média do Ciclo (dias)</label>
+                        <input type="number" x-model.number="settings.avgCycle" min="20" max="45" class="w-full mt-1.5 bg-slate-50 border border-rose-200 rounded-xl p-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-400">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Duração Média da Menstruação (dias)</label>
+                        <input type="number" x-model.number="settings.periodLength" min="2" max="10" class="w-full mt-1.5 bg-slate-50 border border-rose-200 rounded-xl p-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-400">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-rose-100 space-y-3">
+                    <button @click="resetDemoData()" class="w-full bg-rose-50 hover:bg-rose-100 text-brand-700 font-bold py-3 rounded-xl border border-rose-200 transition text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Carregar Dados de Demonstração</span>
+                    </button>
+                    <button @click="clearAllData()" class="w-full bg-slate-100 hover:bg-rose-600 hover:text-white text-slate-600 font-bold py-3 rounded-xl transition text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-trash-arrow-up"></i>
+                        <span>Limpar Todos os Dados</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LOG SYMPTOMS MODAL -->
+    <div x-show="logModalOpen" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" x-transition>
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar border border-rose-100" @click.away="logModalOpen = false">
+            <div class="flex items-center justify-between border-b border-rose-100 pb-4">
+                <h3 class="font-serif-title font-bold text-slate-800 text-xl flex items-center space-x-2">
+                    <i class="fa-solid fa-feather-pointed text-brand-500"></i>
+                    <span x-text="'Registro para ' + formatDateDisplay(selectedDate)"></span>
+                </h3>
+                <button @click="logModalOpen = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Flow Selector -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Intensidade do Fluxo</label>
+                <div class="grid grid-cols-4 gap-2">
+                    <template x-for="(label, key) in flowLabels">
+                        <button type="button" @click="tempLog.flow = (tempLog.flow === key ? '' : key)"
+                                class="py-3 px-2 rounded-2xl border text-xs font-semibold transition flex flex-col items-center justify-center space-y-1.5"
+                                :class="tempLog.flow === key ? 'bg-brand-500 border-brand-600 text-white shadow-md' : 'bg-rose-50/50 border-rose-200 text-slate-700 hover:bg-rose-100/50'">
+                            <i class="fa-solid fa-droplet" :class="key === 'heavy' ? 'text-lg text-white' : key === 'medium' ? 'text-base text-rose-200' : 'text-sm'"></i>
+                            <span class="truncate w-full text-center" x-text="label"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Mood Selector -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Humor do Dia</label>
+                <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    <template x-for="(item, key) in moodLabels">
+                        <button type="button" @click="tempLog.mood = (tempLog.mood === key ? '' : key)"
+                                class="p-2.5 rounded-2xl border text-center transition flex flex-col items-center justify-center"
+                                :class="tempLog.mood === key ? 'bg-lilas-500 border-lilas-600 text-white shadow-md' : 'bg-lilas-50/50 border-lilas-200 text-slate-700 hover:bg-lilas-100/50'">
+                            <span class="text-xl" x-text="item.icon"></span>
+                            <span class="text-[10px] font-semibold mt-1" x-text="item.label"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Symptoms Selector -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Sintomas Físicos</label>
+                <div class="flex flex-wrap gap-2">
+                    <template x-for="(label, key) in symptomLabels">
+                        <button type="button" @click="toggleTempSymptom(key)"
+                                class="py-2 px-3 rounded-xl border text-xs font-semibold transition flex items-center space-x-1.5"
+                                :class="tempLog.symptoms.includes(key) ? 'bg-coral-500 border-coral-600 text-white shadow-sm' : 'bg-coral-50/50 border-coral-200 text-slate-700 hover:bg-coral-100/50'">
+                            <span x-text="label"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Anotações Diárias</label>
+                <textarea x-model="tempLog.notes" rows="3" placeholder="Como foi seu dia?..." class="w-full bg-slate-50 border border-rose-200 rounded-2xl p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 text-slate-800"></textarea>
+            </div>
+
+            <div class="pt-2 flex space-x-3">
+                <button @click="logModalOpen = false" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-2xl transition text-sm">Cancelar</button>
+                <button @click="saveDailyLog()" class="flex-1 brand-gradient-bg hover:opacity-95 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-500/20 transition text-sm">Salvar Registro</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD CYCLE MODAL -->
+    <div x-show="openAddCycleModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" x-transition>
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-6 border border-rose-100" @click.away="openAddCycleModal = false">
+            <div class="flex items-center justify-between border-b border-rose-100 pb-3">
+                <h3 class="font-serif-title font-bold text-slate-800 text-xl flex items-center space-x-2">
+                    <i class="fa-solid fa-calendar-plus text-brand-500"></i>
+                    <span>Adicionar Ciclo Anterior</span>
+                </h3>
+                <button @click="openAddCycleModal = false" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Data de Início</label>
+                    <input type="date" x-model="newCycleInput.startDate" class="w-full mt-1.5 bg-slate-50 border border-rose-200 rounded-xl p-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-400">
+                </div>
+                <div>
+                    <label class="text-xs font-bold uppercase text-brand-600 tracking-wider">Data de Término (Opcional)</label>
+                    <input type="date" x-model="newCycleInput.endDate" class="w-full mt-1.5 bg-slate-50 border border-rose-200 rounded-xl p-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-brand-400">
+                </div>
+            </div>
+
+            <div class="flex space-x-3 pt-2">
+                <button @click="openAddCycleModal = false" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-2xl transition text-sm">Cancelar</button>
+                <button @click="addNewCycle()" class="flex-1 brand-gradient-bg hover:opacity-95 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-brand-500/20 transition text-sm">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bg-white/90 backdrop-blur-md fixed bottom-0 left-0 right-0 border-t border-rose-100 shadow-lg z-40">
+        <div class="max-w-md mx-auto px-4 py-2 flex justify-between items-center">
+            <button @click="currentTab = 'dashboard'" class="flex flex-col items-center space-y-1 py-1 px-3 rounded-2xl transition" :class="currentTab === 'dashboard' ? 'text-brand-600 font-bold bg-brand-50 border border-brand-200' : 'text-slate-400 hover:text-slate-600'">
+                <i class="fa-solid fa-compass text-lg"></i>
+                <span class="text-[10px]">Início</span>
+            </button>
+            <button @click="currentTab = 'calendar'" class="flex flex-col items-center space-y-1 py-1 px-3 rounded-2xl transition" :class="currentTab === 'calendar' ? 'text-brand-600 font-bold bg-brand-50 border border-brand-200' : 'text-slate-400 hover:text-slate-600'">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span class="text-[10px]">Calendário</span>
+            </button>
+            <button @click="currentTab = 'diary'" class="flex flex-col items-center space-y-1 py-1 px-3 rounded-2xl transition" :class="currentTab === 'diary' ? 'text-brand-600 font-bold bg-brand-50 border border-brand-200' : 'text-slate-400 hover:text-slate-600'">
+                <i class="fa-solid fa-book-heart text-lg"></i>
+                <span class="text-[10px]">Diário</span>
+            </button>
+            <button @click="currentTab = 'history'" class="flex flex-col items-center space-y-1 py-1 px-3 rounded-2xl transition" :class="currentTab === 'history' ? 'text-brand-600 font-bold bg-brand-50 border border-brand-200' : 'text-slate-400 hover:text-slate-600'">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px]">Análise</span>
+            </button>
+            <button @click="currentTab = 'settings'" class="flex flex-col items-center space-y-1 py-1 px-3 rounded-2xl transition" :class="currentTab === 'settings' ? 'text-brand-600 font-bold bg-brand-50 border border-brand-200' : 'text-slate-400 hover:text-slate-600'">
+                <i class="fa-solid fa-sliders text-lg"></i>
+                <span class="text-[10px]">Ajustes</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Service Worker Registration Script -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    const CACHE_NAME = 'gimisidora-pwa-v1';
+                    self.addEventListener('install', (e) => {
+                        self.skipWaiting();
+                    });
+                    self.addEventListener('activate', (e) => {
+                        e.waitUntil(clients.claim());
+                    });
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            caches.match(e.request).then((response) => {
+                                return response || fetch(e.request);
+                            })
+                        );
+                    });
+                `;
+                const blob = new Blob([swCode], {type: 'text/javascript'});
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl).catch(() => {});
+            });
+        }
+    </script>
+
+    <script>
+        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        
+        const symptomLabels = {
+            cramps: 'Cólicas',
+            headache: 'Dor de cabeça',
+            bloating: 'Inchaço',
+            acne: 'Acne',
+            fatigue: 'Cansaço',
+            tender_breasts: 'Sensibilidade nas mamas',
+            craving: 'Desejo por doces',
+            backpain: 'Dor nas costas'
+        };
+
+        const moodLabels = {
+            happy: { label: 'Feliz', icon: '😊' },
+            calm: { label: 'Calma', icon: '🧘‍♀️' },
+            sensitive: { label: 'Sensível', icon: '🥺' },
+            annoyed: { label: 'Irritada', icon: '😤' },
+            tired: { label: 'Cansada', icon: '😴' },
+            anxious: { label: 'Ansiosa', icon: '😰' }
+        };
+
+        const flowLabels = {
+            spotting: 'Escape',
+            light: 'Leve',
+            medium: 'Moderado',
+            heavy: 'Intenso'
+        };
+
+        function gimisidoraApp() {
+            return {
+                currentTab: 'dashboard',
+                logModalOpen: false,
+                openAddCycleModal: false,
+                selectedDate: '',
+                toast: { show: false, message: '', icon: 'fa-solid fa-circle-check' },
+                deferredPrompt: null,
+
+                settings: {
+                    avgCycle: 28,
+                    periodLength: 5
+                },
+                
+                cycles: [],
+                dailyLogs: {},
+                
+                tempLog: {
+                    flow: '',
+                    mood: '',
+                    symptoms: [],
+                    notes: ''
+                },
+
+                newCycleInput: {
+                    startDate: '',
+                    endDate: ''
+                },
+
+                calendarYear: new Date().getFullYear(),
+                calendarMonth: new Date().getMonth(),
+
+                init() {
+                    this.loadData();
+                    if (this.cycles.length === 0) {
+                        this.resetDemoData();
+                    }
+                    this.$watch('settings', () => this.saveData(), { deep: true });
+                    this.$watch('cycles', () => {
+                        this.saveData();
+                        this.initChart();
+                    }, { deep: true });
+
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        this.deferredPrompt = e;
+                    });
+
+                    setTimeout(() => this.initChart(), 300);
+                },
+
+                installPWA() {
+                    if (this.deferredPrompt) {
+                        this.deferredPrompt.prompt();
+                        this.deferredPrompt.userChoice.then(() => {
+                            this.deferredPrompt = null;
+                        });
+                    }
+                },
+
+                showToast(msg, icon = 'fa-solid fa-circle-check') {
+                    this.toast.message = msg;
+                    this.toast.icon = icon;
+                    this.toast.show = true;
+                    setTimeout(() => { this.toast.show = false; }, 3000);
+                },
+
+                loadData() {
+                    const savedCycles = localStorage.getItem('gimisidora_cycles');
+                    if (savedCycles) this.cycles = JSON.parse(savedCycles);
+
+                    const savedLogs = localStorage.getItem('gimisidora_logs');
+                    if (savedLogs) this.dailyLogs = JSON.parse(savedLogs);
+
+                    const savedSettings = localStorage.getItem('gimisidora_settings');
+                    if (savedSettings) this.settings = JSON.parse(savedSettings);
+                },
+
+                saveData() {
+                    localStorage.setItem('gimisidora_cycles', JSON.stringify(this.cycles));
+                    localStorage.setItem('gimisidora_logs', JSON.stringify(this.dailyLogs));
+                    localStorage.setItem('gimisidora_settings', JSON.stringify(this.settings));
+                },
+
+                resetDemoData() {
+                    const today = new Date();
+                    const c1 = new Date(today); c1.setDate(c1.getDate() - 14);
+                    const c2 = new Date(today); c2.setDate(c2.getDate() - 42);
+                    const c3 = new Date(today); c3.setDate(c3.getDate() - 70);
+
+                    this.cycles = [
+                        { startDate: this.formatDateKey(c1), endDate: '' },
+                        { startDate: this.formatDateKey(c2), endDate: '' },
+                        { startDate: this.formatDateKey(c3), endDate: '' }
+                    ];
+                    this.saveData();
+                    this.showToast('Dados de demonstração carregados!');
+                },
+
+                clearAllData() {
+                    this.cycles = [];
+                    this.dailyLogs = {};
+                    this.saveData();
+                    this.showToast('Histórico apagado', 'fa-solid fa-trash');
+                },
+
+                formatDateKey(date) {
+                    const d = new Date(date);
+                    let month = '' + (d.getMonth() + 1),
+                        day = '' + d.getDate(),
+                        year = d.getFullYear();
+                    if (month.length < 2) month = '0' + month;
+                    if (day.length < 2) day = '0' + day;
+                    return [year, month, day].join('-');
+                },
+
+                formatDateDisplay(dateStr) {
+                    if (!dateStr) return '';
+                    const parts = dateStr.split('-');
+                    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                },
+
+                get latestCycleStart() {
+                    if (this.cycles.length === 0) return new Date();
+                    const sorted = [...this.cycles].sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+                    return new Date(sorted[0].startDate + 'T00:00:00');
+                },
+
+                get lastLoggedEntry() {
+                    const keys = Object.keys(this.dailyLogs).sort((a,b) => new Date(b) - new Date(a));
+                    if (keys.length === 0) return null;
+                    return { date: keys[0], data: this.dailyLogs[keys[0]] };
+                },
+
+                get isPeriodToday() {
+                    const todayStr = this.formatDateKey(new Date());
+                    const start = new Date(this.latestCycleStart);
+                    const end = new Date(start);
+                    end.setDate(end.getDate() + this.settings.periodLength);
+                    const today = new Date(todayStr + 'T00:00:00');
+                    return today >= start && today <= end;
+                },
+
+                togglePeriodToday() {
+                    const todayStr = this.formatDateKey(new Date());
+                    const idx = this.cycles.findIndex(c => c.startDate === todayStr);
+                    if (idx > -1) {
+                        this.cycles.splice(idx, 1);
+                        this.showToast('Data removida do ciclo', 'fa-solid fa-calendar-xmark');
+                    } else {
+                        this.cycles.push({ startDate: todayStr, endDate: '' });
+                        this.cycles.sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+                        this.showToast('Menstruação iniciada registrada!');
+                    }
+                },
+
+                get stats() {
+                    const start = this.latestCycleStart;
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    start.setHours(0,0,0,0);
+
+                    const diffTime = today - start;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    const cycleDay = diffDays > 0 ? ((diffDays - 1) % this.settings.avgCycle) + 1 : 1;
+
+                    let currentPhase = 'Menstrual';
+                    let phaseTitle = 'Fase Menstrual';
+                    let phaseDescription = 'O corpo renova suas energias. Pratique o autocuidado e respeite seus momentos de descanso.';
+                    let phaseTipTitle = 'Nutrição & Acolhimento';
+                    let phaseTipBody = 'Chás mornos de camomila, hidratação constante e boa qualidade de sono auxiliam na regeneração do corpo.';
+
+                    const ovulationDayOffset = this.settings.avgCycle - 14;
+                    const fertileStart = ovulationDayOffset - 5;
+                    const fertileEnd = ovulationDayOffset + 1;
+
+                    if (cycleDay <= this.settings.periodLength) {
+                        currentPhase = 'Menstrual';
+                        phaseTitle = 'Fase Menstrual';
+                        phaseDescription = 'Fase de renovação interior. Foque no seu aconchego e bem-estar.';
+                    } else if (cycleDay < fertileStart) {
+                        currentPhase = 'Folicular';
+                        phaseTitle = 'Fase Folicular';
+                        phaseDescription = 'Elevação do estrogênio. Momento de maior vitalidade, criatividade e novas ideias.';
+                        phaseTipTitle = 'Disposição & Foco';
+                        phaseTipBody = 'Aproveite o aumento natural da energia para iniciar novos objetivos e manter hábitos saudáveis.';
+                    } else if (cycleDay >= fertileStart && cycleDay <= fertileEnd) {
+                        currentPhase = 'Ovulatório';
+                        phaseTitle = 'Janela Fértil e Ovulação';
+                        phaseDescription = 'Pico do ciclo vital e fertilidade. Maior autoconfiança e brilho social.';
+                        phaseTipTitle = 'Conexão & Criatividade';
+                        phaseTipBody = 'Ótimo momento para atividades em grupo, comunicação e momentos de relaxamento em movimento.';
+                    } else {
+                        currentPhase = 'Lútea';
+                        phaseTitle = 'Fase Lútea';
+                        phaseDescription = 'Aumento da progesterona. Convite ao desaceleração, organização e olhar interior.';
+                        phaseTipTitle = 'Equilíbrio e Calma';
+                        phaseTipBody = 'Exercícios leves, alimentação rica em magnésio e momentos de desaceleração favorecem o bem-estar.';
+                    }
+
+                    const nextPeriod = new Date(start);
+                    nextPeriod.setDate(nextPeriod.getDate() + this.settings.avgCycle);
+                    while (nextPeriod < today) {
+                        nextPeriod.setDate(nextPeriod.getDate() + this.settings.avgCycle);
+                    }
+
+                    const ovulationDate = new Date(start);
+                    ovulationDate.setDate(ovulationDate.getDate() + ovulationDayOffset);
+
+                    const daysUntilNext = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24));
+
+                    return {
+                        cycleDay,
+                        avgCycle: this.settings.avgCycle,
+                        currentPhase,
+                        phaseTitle,
+                        phaseDescription,
+                        phaseTipTitle,
+                        phaseTipBody,
+                        nextPeriodDateFormatted: this.formatDateDisplay(this.formatDateKey(nextPeriod)),
+                        ovulationDateFormatted: this.formatDateDisplay(this.formatDateKey(ovulationDate)),
+                        daysUntilNext: daysUntilNext >= 0 ? daysUntilNext : 0
+                    };
+                },
+
+                changeMonth(dir) {
+                    this.calendarMonth += dir;
+                    if (this.calendarMonth > 11) {
+                        this.calendarMonth = 0;
+                        this.calendarYear++;
+                    } else if (this.calendarMonth < 0) {
+                        this.calendarMonth = 11;
+                        this.calendarYear--;
+                    }
+                },
+
+                goToCurrentMonth() {
+                    const now = new Date();
+                    this.calendarMonth = now.getMonth();
+                    this.calendarYear = now.getFullYear();
+                },
+
+                get calendarDays() {
+                    const year = this.calendarYear;
+                    const month = this.calendarMonth;
+                    const firstDayIndex = new Date(year, month, 1).getDay();
+                    const totalDays = new Date(year, month + 1, 0).getDate();
+                    const todayStr = this.formatDateKey(new Date());
+
+                    let days = [];
+                    for (let i = 0; i < firstDayIndex; i++) {
+                        days.push({ dayNumber: '', dateStr: null });
+                    }
+
+                    const latestStart = new Date(this.latestCycleStart);
+                    latestStart.setHours(0,0,0,0);
+                    const ovulationDayOffset = this.settings.avgCycle - 14;
+
+                    for (let d = 1; d <= totalDays; d++) {
+                        const dateObj = new Date(year, month, d);
+                        const dateStr = this.formatDateKey(dateObj);
+                        dateObj.setHours(0,0,0,0);
+
+                        let isPeriod = false;
+                        let isFertile = false;
+                        let isOvulation = false;
+                        let isPredictedPeriod = false;
+
+                        for (let cycle of this.cycles) {
+                            const cStart = new Date(cycle.startDate + 'T00:00:00');
+                            const pEnd = new Date(cStart);
+                            pEnd.setDate(pEnd.getDate() + this.settings.periodLength - 1);
+                            
+                            if (dateObj >= cStart && dateObj <= pEnd) isPeriod = true;
+
+                            const oDate = new Date(cStart);
+                            oDate.setDate(oDate.getDate() + ovulationDayOffset);
+                            const fStart = new Date(oDate);
+                            fStart.setDate(fStart.getDate() - 5);
+                            const fEnd = new Date(oDate);
+                            fEnd.setDate(fEnd.getDate() + 1);
+
+                            if (dateObj >= fStart && dateObj <= fEnd) {
+                                isFertile = true;
+                                if (dateObj.getTime() === oDate.getTime()) isOvulation = true;
+                            }
+                        }
+
+                        let nextP = new Date(latestStart);
+                        nextP.setDate(nextP.getDate() + this.settings.avgCycle);
+                        while (nextP <= new Date(year, 11, 31)) {
+                            let pEnd = new Date(nextP);
+                            pEnd.setDate(pEnd.getDate() + this.settings.periodLength - 1);
+                            if (dateObj >= nextP && dateObj <= pEnd) isPredictedPeriod = true;
+
+                            const oDate = new Date(nextP);
+                            oDate.setDate(oDate.getDate() + ovulationDayOffset);
+                            const fStart = new Date(oDate);
+                            fStart.setDate(fStart.getDate() - 5);
+                            const fEnd = new Date(oDate);
+                            fEnd.setDate(fEnd.getDate() + 1);
+                            if (dateObj >= fStart && dateObj <= fEnd) {
+                                isFertile = true;
+                                if (dateObj.getTime() === oDate.getTime()) isOvulation = true;
+                            }
+                            nextP.setDate(nextP.getDate() + this.settings.avgCycle);
+                        }
+
+                        days.push({
+                            dayNumber: d,
+                            dateStr,
+                            isPeriod,
+                            isFertile,
+                            isOvulation,
+                            isPredictedPeriod,
+                            isToday: dateStr === todayStr
+                        });
+                    }
+
+                    return days;
+                },
+
+                openLogModal(dateStr) {
+                    if (!dateStr) return;
+                    this.selectedDate = dateStr;
+                    const existing = this.dailyLogs[dateStr];
+                    if (existing) {
+                        this.tempLog = {
+                            flow: existing.flow || '',
+                            mood: existing.mood || '',
+                            symptoms: [...(existing.symptoms || [])],
+                            notes: existing.notes || ''
+                        };
+                    } else {
+                        this.tempLog = { flow: '', mood: '', symptoms: [], notes: '' };
+                    }
+                    this.logModalOpen = true;
+                },
+
+                toggleTempSymptom(key) {
+                    const idx = this.tempLog.symptoms.indexOf(key);
+                    if (idx > -1) {
+                        this.tempLog.symptoms.splice(idx, 1);
+                    } else {
+                        this.tempLog.symptoms.push(key);
+                    }
+                },
+
+                saveDailyLog() {
+                    this.dailyLogs[this.selectedDate] = { ...this.tempLog };
+                    this.saveData();
+                    this.logModalOpen = false;
+                    this.showToast('Registro do diário salvo com sucesso!');
+                },
+
+                addNewCycle() {
+                    if (!this.newCycleInput.startDate) return;
+                    this.cycles.push({
+                        startDate: this.newCycleInput.startDate,
+                        endDate: this.newCycleInput.endDate || ''
+                    });
+                    this.cycles.sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+                    this.newCycleInput = { startDate: '', endDate: '' };
+                    this.openAddCycleModal = false;
+                    this.showToast('Ciclo adicionado com sucesso!');
+                },
+
+                deleteCycle(index) {
+                    this.cycles.splice(index, 1);
+                    this.showToast('Ciclo excluído', 'fa-solid fa-trash');
+                },
+
+                initChart() {
+                    const canvasEl = document.getElementById('cycleChart');
+                    if (!canvasEl) return;
+                    
+                    const ctx = canvasEl.getContext('2d');
+                    if (window.myCycleChart) {
+                        window.myCycleChart.destroy();
+                    }
+
+                    let labels = [];
+                    let data = [];
+                    
+                    const sortedAsc = [...this.cycles].sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+                    for (let i = 0; i < sortedAsc.length - 1; i++) {
+                        const d1 = new Date(sortedAsc[i].startDate);
+                        const d2 = new Date(sortedAsc[i+1].startDate);
+                        const diffDays = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+                        labels.push(`Ciclo ${i+1}`);
+                        data.push(diffDays);
+                    }
+
+                    if (data.length === 0) {
+                        labels = ['Ciclo 1', 'Ciclo 2', 'Ciclo 3'];
+                        data = [28, 29, 27];
+                    }
+
+                    window.myCycleChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Duração (dias)',
+                                data: data,
+                                borderColor: '#EC4899',
+                                backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.35,
+                                pointBackgroundColor: '#A855F7',
+                                pointBorderColor: '#FFF',
+                                pointBorderWidth: 2,
+                                pointRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    min: 20,
+                                    max: 40,
+                                    grid: { color: '#FCE7F3' },
+                                    ticks: { color: '#9D174D' }
+                                },
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: '#9D174D' }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
